@@ -158,12 +158,31 @@
         padding: 10px;
       }
 
+      .scribble-keyboard-row {
+        margin-bottom: 10px;
+      }
+
       [data-scribble-container='true'] {
         min-height: 310px;
         position: relative;
         overflow: hidden;
         touch-action: none;
         user-select: none;
+      }
+
+      .scribble-keyboard-input {
+        width: 100%;
+        height: 40px;
+        border: 2px solid var(--black);
+        border-radius: 10px;
+        padding: 0 12px;
+        font-size: 16px;
+        outline: none;
+        background: #fff;
+      }
+
+      .scribble-keyboard-input:focus {
+        box-shadow: 0 0 0 3px rgba(173, 211, 255, 0.45);
       }
 
       .scribble-tile {
@@ -789,6 +808,20 @@
 
           <div class="scribble-space-view" id="scribble-space-view" hidden>
             <div class="scribble-space-shell">
+              <div class="scribble-keyboard-row">
+                <input
+                  id="scribble-keyboard-input"
+                  class="scribble-keyboard-input"
+                  type="text"
+                  inputmode="text"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  aria-label="Scribble keyboard input"
+                  placeholder="Tocca qui per digitare lettere"
+                />
+              </div>
               <div
                 data-scribble-container="true"
                 id="scribble-container"
@@ -1033,6 +1066,7 @@
         const scribbleBtn = document.getElementById('scribble-btn');
         const scribbleSpaceView = document.getElementById('scribble-space-view');
         const scribbleContainer = document.getElementById('scribble-container');
+        const scribbleKeyboardInput = document.getElementById('scribble-keyboard-input');
 
         const clueParts = [clueDefinition, clueFodder, clueIndicator].filter(Boolean);
 
@@ -1255,6 +1289,15 @@
           scribbleContainer.appendChild(tile);
         };
 
+        const focusScribbleKeyboard = () => {
+          if (!scribbleKeyboardInput || !scribbleSpaceView || scribbleSpaceView.hidden) {
+            return;
+          }
+
+          scribbleKeyboardInput.focus({ preventScroll: true });
+          scribbleKeyboardInput.value = '';
+        };
+
         const openScribbleSpace = () => {
           if (!solutionActions || !scribbleSpaceView) {
             return;
@@ -1262,6 +1305,9 @@
 
           solutionActions.hidden = true;
           scribbleSpaceView.hidden = false;
+
+          focusScribbleKeyboard();
+          window.setTimeout(focusScribbleKeyboard, 50);
         };
 
         if (scribbleContainer) {
@@ -1393,6 +1439,32 @@
 
             window.addEventListener('touchcancel', stopDraggedTile);
           }
+        }
+
+        if (scribbleContainer) {
+          scribbleContainer.addEventListener('click', focusScribbleKeyboard);
+          scribbleContainer.addEventListener(
+            'touchstart',
+            () => {
+              focusScribbleKeyboard();
+            },
+            { passive: true }
+          );
+        }
+
+        if (scribbleKeyboardInput) {
+          scribbleKeyboardInput.addEventListener('input', event => {
+            const target = event.target;
+
+            if (!(target instanceof HTMLInputElement)) {
+              return;
+            }
+
+            const letters = (target.value.match(/[a-zA-Z]/g) || []);
+
+            letters.forEach(createScribbleTile);
+            target.value = '';
+          });
         }
 
         if (checkBtn && solutionActions && boxes.length >= 21) {
