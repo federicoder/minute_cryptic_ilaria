@@ -159,7 +159,8 @@
       }
 
       .scribble-keyboard-row {
-        margin-bottom: 10px;
+        margin: 0;
+        height: 0;
       }
 
       [data-scribble-container='true'] {
@@ -171,18 +172,13 @@
       }
 
       .scribble-keyboard-input {
-        width: 100%;
-        height: 40px;
-        border: 2px solid var(--black);
-        border-radius: 10px;
-        padding: 0 12px;
-        font-size: 16px;
-        outline: none;
-        background: #fff;
-      }
-
-      .scribble-keyboard-input:focus {
-        box-shadow: 0 0 0 3px rgba(173, 211, 255, 0.45);
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+        border: 0;
+        padding: 0;
       }
 
       .scribble-trash-bg,
@@ -859,7 +855,6 @@
                   autocapitalize="none"
                   spellcheck="false"
                   aria-label="Scribble keyboard input"
-                  placeholder="Tocca qui per digitare lettere"
                 />
               </div>
               <div
@@ -1111,6 +1106,8 @@
         const scribbleKeyboardInput = document.getElementById('scribble-keyboard-input');
         const scribbleTrashBg = document.getElementById('scribble-trash-bg');
         const scribbleTrashIcon = document.getElementById('scribble-trash-icon');
+        const isMobileInputMode =
+          (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
 
         const clueParts = [clueDefinition, clueFodder, clueIndicator].filter(Boolean);
 
@@ -1204,6 +1201,7 @@
         let nextLetterIndex = 0;
         let nextTileId = 1;
         const maxScribbleTiles = 21;
+        let suppressKeyboardFocusUntil = 0;
         const revealNextLetter = () => {
           if (!boxes.length || nextLetterIndex >= solutionLetters.length) {
             return;
@@ -1282,6 +1280,11 @@
           dragState.touchId = touchId;
           dragState.pointerId = pointerId;
           dragState.isOverTrash = false;
+          suppressKeyboardFocusUntil = Date.now() + 250;
+
+          if (scribbleKeyboardInput) {
+            scribbleKeyboardInput.blur();
+          }
 
           tile.classList.add('is-dragging');
           tile.style.transition = 'none';
@@ -1384,6 +1387,14 @@
           scribbleKeyboardInput.value = '';
         };
 
+        const requestMobileKeyboard = () => {
+          if (!isMobileInputMode || Date.now() < suppressKeyboardFocusUntil) {
+            return;
+          }
+
+          focusScribbleKeyboard();
+        };
+
         const setScribbleSpaceVisible = visible => {
           if (!scribbleSpaceView) {
             return;
@@ -1404,8 +1415,11 @@
           }
 
           if (visible) {
-            focusScribbleKeyboard();
-            window.setTimeout(focusScribbleKeyboard, 50);
+            if (!isMobileInputMode) {
+              focusScribbleKeyboard();
+            }
+          } else if (scribbleKeyboardInput) {
+            scribbleKeyboardInput.blur();
           }
         };
 
@@ -1551,14 +1565,15 @@
         }
 
         if (scribbleContainer) {
-          scribbleContainer.addEventListener('click', focusScribbleKeyboard);
-          scribbleContainer.addEventListener(
-            'touchstart',
-            () => {
-              focusScribbleKeyboard();
-            },
-            { passive: true }
-          );
+          scribbleContainer.addEventListener('click', event => {
+            const target = event.target;
+
+            if (!(target instanceof Element) || target.closest('.scribble-tile')) {
+              return;
+            }
+
+            requestMobileKeyboard();
+          });
         }
 
         if (scribbleKeyboardInput) {
