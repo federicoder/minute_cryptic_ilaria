@@ -155,7 +155,7 @@
         border-radius: 16px;
         background: #fff;
         box-shadow: 3px 3px 0 0 var(--black);
-        padding: 10px;
+        padding: 10px 10px 0;
       }
 
       .scribble-keyboard-row {
@@ -183,6 +183,46 @@
 
       .scribble-keyboard-input:focus {
         box-shadow: 0 0 0 3px rgba(173, 211, 255, 0.45);
+      }
+
+      .scribble-trash-bg,
+      .scribble-trash-icon {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+      }
+
+      .scribble-trash-bg {
+        bottom: -44px;
+      }
+
+      .scribble-trash-icon {
+        bottom: -12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .scribble-trash-icon svg {
+        margin-top: 0 !important;
+      }
+
+      .scribble-trash-visible {
+        opacity: 1 !important;
+        transform: translateX(-50%) translateY(0) !important;
+      }
+
+      .scribble-trash-bg.scribble-trash-active {
+        background-color: rgba(220, 38, 38, 0.35) !important;
+        width: 78% !important;
+        height: 84px !important;
+      }
+
+      .scribble-trash-icon.scribble-trash-active {
+        transform: translateX(-50%) translateY(0) scale(1.08) !important;
       }
 
       .scribble-tile {
@@ -842,7 +882,8 @@
                   "
                 ></div>
                 <div
-                  class="absolute bottom-0 left-1/2 pointer-events-none"
+                  id="scribble-trash-bg"
+                  class="absolute bottom-0 left-1/2 pointer-events-none scribble-trash-bg"
                   style="
                     width: 70%;
                     height: 72px;
@@ -859,7 +900,8 @@
                   "
                 ></div>
                 <div
-                  class="absolute bottom-0 left-1/2 pointer-events-none flex items-start justify-center"
+                  id="scribble-trash-icon"
+                  class="absolute bottom-0 left-1/2 pointer-events-none flex items-center justify-center scribble-trash-icon"
                   style="
                     width: 70%;
                     height: 72px;
@@ -881,7 +923,7 @@
                     height="1em"
                     width="1em"
                     xmlns="http://www.w3.org/2000/svg"
-                    style="margin-top: 6px; font-size: 21.6px"
+                    style="margin-top: 0; font-size: 21.6px"
                   >
                     <path
                       d="M268 416h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12zM432 80h-82.41l-34-56.7A48 48 0 0 0 274.41 0H173.59a48 48 0 0 0-41.16 23.3L98.41 80H16A16 16 0 0 0 0 96v16a16 16 0 0 0 16 16h16v336a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128h16a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM171.84 50.91A6 6 0 0 1 177 48h94a6 6 0 0 1 5.15 2.91L293.61 80H154.39zM368 464H80V128h288zm-212-48h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12z"
@@ -1067,6 +1109,8 @@
         const scribbleSpaceView = document.getElementById('scribble-space-view');
         const scribbleContainer = document.getElementById('scribble-container');
         const scribbleKeyboardInput = document.getElementById('scribble-keyboard-input');
+        const scribbleTrashBg = document.getElementById('scribble-trash-bg');
+        const scribbleTrashIcon = document.getElementById('scribble-trash-icon');
 
         const clueParts = [clueDefinition, clueFodder, clueIndicator].filter(Boolean);
 
@@ -1199,7 +1243,30 @@
           offsetX: 0,
           offsetY: 0,
           containerRect: null,
-          touchId: null
+          touchId: null,
+          isOverTrash: false
+        };
+
+        const updateTrashState = (isVisible, isActive) => {
+          if (scribbleTrashBg) {
+            scribbleTrashBg.classList.toggle('scribble-trash-visible', isVisible);
+            scribbleTrashBg.classList.toggle('scribble-trash-active', isVisible && isActive);
+          }
+
+          if (scribbleTrashIcon) {
+            scribbleTrashIcon.classList.toggle('scribble-trash-visible', isVisible);
+            scribbleTrashIcon.classList.toggle('scribble-trash-active', isVisible && isActive);
+          }
+        };
+
+        const isPointOverTrash = (clientX, clientY) => {
+          if (!scribbleTrashBg) {
+            return false;
+          }
+
+          const trashRect = scribbleTrashBg.getBoundingClientRect();
+
+          return clientX >= trashRect.left && clientX <= trashRect.right && clientY >= trashRect.top && clientY <= trashRect.bottom;
         };
 
         const startDraggedTile = (tile, clientX, clientY, touchId = null, pointerId = null) => {
@@ -1214,9 +1281,11 @@
           dragState.containerRect = scribbleContainer.getBoundingClientRect();
           dragState.touchId = touchId;
           dragState.pointerId = pointerId;
+          dragState.isOverTrash = false;
 
           tile.classList.add('is-dragging');
           tile.style.transition = 'none';
+          updateTrashState(true, false);
         };
 
         const moveDraggedTile = (clientX, clientY) => {
@@ -1232,20 +1301,37 @@
 
           dragState.tile.style.left = `${nextLeft}px`;
           dragState.tile.style.top = `${nextTop}px`;
+
+          const isOverTrash = isPointOverTrash(clientX, clientY);
+
+          if (isOverTrash !== dragState.isOverTrash) {
+            dragState.isOverTrash = isOverTrash;
+            updateTrashState(true, isOverTrash);
+          }
         };
 
-        const stopDraggedTile = () => {
+        const stopDraggedTile = (clientX = null, clientY = null) => {
           if (!dragState.tile) {
             return;
           }
 
-          dragState.tile.classList.remove('is-dragging');
-          dragState.tile.style.transition = 'left 0.2s, top 0.2s, opacity 0.2s';
+          const droppedTile = dragState.tile;
+          const shouldDeleteTile =
+            dragState.isOverTrash || (typeof clientX === 'number' && typeof clientY === 'number' && isPointOverTrash(clientX, clientY));
+
+          droppedTile.classList.remove('is-dragging');
+          droppedTile.style.transition = 'left 0.2s, top 0.2s, opacity 0.2s';
+
+          if (shouldDeleteTile) {
+            droppedTile.remove();
+          }
 
           dragState.tile = null;
           dragState.containerRect = null;
           dragState.touchId = null;
           dragState.pointerId = null;
+          dragState.isOverTrash = false;
+          updateTrashState(false, false);
         };
 
         const createScribbleTile = letter => {
@@ -1298,16 +1384,37 @@
           scribbleKeyboardInput.value = '';
         };
 
-        const openScribbleSpace = () => {
-          if (!solutionActions || !scribbleSpaceView) {
+        const setScribbleSpaceVisible = visible => {
+          if (!scribbleSpaceView) {
             return;
           }
 
-          solutionActions.hidden = true;
-          scribbleSpaceView.hidden = false;
+          scribbleSpaceView.hidden = !visible;
 
-          focusScribbleKeyboard();
-          window.setTimeout(focusScribbleKeyboard, 50);
+          if (hintsBtn) {
+            hintsBtn.hidden = visible;
+          }
+
+          if (checkBtn) {
+            checkBtn.hidden = visible;
+          }
+
+          if (scribbleBtn) {
+            scribbleBtn.setAttribute('aria-expanded', visible ? 'true' : 'false');
+          }
+
+          if (visible) {
+            focusScribbleKeyboard();
+            window.setTimeout(focusScribbleKeyboard, 50);
+          }
+        };
+
+        const toggleScribbleSpace = () => {
+          if (!scribbleSpaceView) {
+            return;
+          }
+
+          setScribbleSpaceVisible(scribbleSpaceView.hidden);
         };
 
         if (scribbleContainer) {
@@ -1368,7 +1475,7 @@
                 } catch (_error) {}
               }
 
-              stopDraggedTile();
+              stopDraggedTile(event.clientX, event.clientY);
             };
 
             scribbleContainer.addEventListener('pointerup', endPointerDrag);
@@ -1388,7 +1495,9 @@
             window.addEventListener('mousemove', event => {
               moveDraggedTile(event.clientX, event.clientY);
             });
-            window.addEventListener('mouseup', stopDraggedTile);
+            window.addEventListener('mouseup', event => {
+              stopDraggedTile(event.clientX, event.clientY);
+            });
 
             scribbleContainer.addEventListener(
               'touchstart',
@@ -1433,7 +1542,7 @@
               const endedTouch = Array.from(event.changedTouches).find(item => item.identifier === dragState.touchId);
 
               if (endedTouch) {
-                stopDraggedTile();
+                stopDraggedTile(endedTouch.clientX, endedTouch.clientY);
               }
             });
 
@@ -1460,7 +1569,7 @@
               return;
             }
 
-            const letters = (target.value.match(/[a-zA-Z]/g) || []);
+            const letters = target.value.match(/[a-zA-Z]/g) || [];
 
             letters.forEach(createScribbleTile);
             target.value = '';
@@ -1547,7 +1656,7 @@
         }
 
         if (scribbleBtn) {
-          scribbleBtn.addEventListener('click', openScribbleSpace);
+          scribbleBtn.addEventListener('click', toggleScribbleSpace);
         }
 
         document.addEventListener('keydown', event => {
