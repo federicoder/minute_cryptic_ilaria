@@ -1,0 +1,1504 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minute Cryptic - Prova</title>
+    <style>
+      :root {
+        --mc-blue: #add3ff;
+        --mc-blue-dark: #5ca8f5;
+        --mc-pink: #f5d1fd;
+        --mc-yellow: #ffe16b;
+        --black: #111;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(173 211 255 / var(--tw-bg-opacity, 1));
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: var(--black);
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding-bottom: 24px;
+      }
+
+      .top {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(173 211 255 / var(--tw-bg-opacity, 1));
+        color: #fff;
+        padding: 12px 16px;
+      }
+
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .pill {
+        border: 3px solid var(--black);
+        border-radius: 999px;
+        padding: 8px 18px;
+        background: var(--mc-pink);
+        font-weight: 700;
+      }
+
+      .section {
+        padding: 14px 16px;
+      }
+
+      .card {
+        background: #fff;
+        border: 3px solid var(--black);
+        border-radius: 18px;
+        box-shadow: 4px 4px 0 0 var(--black);
+        padding: 16px;
+      }
+
+      .title {
+        margin: 0 0 12px;
+        font-size: 24px;
+        text-align: center;
+      }
+
+      .subtitle {
+        margin: 0 0 10px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .clue {
+        text-align: center;
+        font-size: 18px;
+        margin: 0 0 16px;
+      }
+
+      .clue-part {
+        padding: 0 2px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease-in-out;
+      }
+
+      .clue-highlight-definition {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(213 232 255 / var(--tw-bg-opacity, 1));
+      }
+
+      .clue-highlight-fodder {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(255 242 177 / var(--tw-bg-opacity, 1));
+      }
+
+      .clue-highlight-indicator {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(245 209 253 / var(--tw-bg-opacity, 1));
+      }
+
+      .solution {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .word {
+        display: flex;
+        gap: 6px;
+        flex-wrap: nowrap;
+      }
+
+      .box {
+        width: 34px;
+        height: 34px;
+        border: 2px solid var(--black);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 20px;
+        text-transform: uppercase;
+      }
+
+      .box.hint-letter {
+        --tw-bg-opacity: 1;
+
+        background-color: rgb(255 242 177 / var(--tw-bg-opacity, 1));
+      }
+
+      .solution-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 14px;
+      }
+
+      .scribble-space-view {
+        margin-top: 14px;
+      }
+
+      .scribble-space-shell {
+        border: 3px solid var(--black);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 3px 3px 0 0 var(--black);
+        padding: 10px;
+      }
+
+      [data-scribble-container='true'] {
+        min-height: 310px;
+        position: relative;
+        overflow: hidden;
+        touch-action: none;
+        user-select: none;
+      }
+
+      .scribble-tile {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--black);
+        border-radius: 10px;
+        font-family: Georgia, serif;
+        font-size: 38px;
+        line-height: 1;
+        user-select: none;
+        touch-action: none;
+        cursor: grab;
+      }
+
+      .scribble-tile.is-dragging {
+        cursor: grabbing;
+        opacity: 0.9;
+      }
+
+      .scribble-tile-letter {
+        transform: translateY(-2px);
+        pointer-events: none;
+      }
+
+      .bg-mc-pink {
+        background: var(--mc-pink);
+      }
+
+      .shadow-btn {
+        height: 50px;
+        min-height: 50px;
+        border: 3px solid var(--black);
+        border-radius: 999px;
+        padding: 0 24px;
+        font-family: Georgia, serif;
+        font-size: 20px;
+        font-weight: 700;
+        box-shadow: 3px 3px 0 0 var(--black);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .shadow-btn p {
+        margin: 0;
+        line-height: 1;
+      }
+
+      .shadow-btn-yellow {
+        background: var(--mc-yellow);
+      }
+
+      .shadow-btn-pink {
+        background: var(--mc-pink);
+      }
+
+      .shadow-icon-btn {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--black);
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--mc-blue);
+        box-shadow: 3px 3px 0 0 var(--black);
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .hint-modal-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      .hint-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(173, 211, 255, 0.5);
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+      }
+
+      .hint-modal-wrap {
+        position: absolute;
+        inset-inline: 0;
+        bottom: 16px;
+        display: flex;
+        justify-content: center;
+        padding: 0 16px;
+      }
+
+      .hint-modal-panel {
+        position: relative;
+        width: min(100%, 400px);
+        max-height: calc(100vh - 2rem);
+        border: 3px solid var(--black);
+        box-shadow: 3px 3px 0 0 var(--black);
+        border-radius: 16px;
+        background: #fff;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(110%);
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hint-modal-header {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        padding-right: 56px;
+        flex-shrink: 0;
+      }
+
+      .hint-modal-title {
+        margin: 0;
+        color: #000;
+        font-size: 16px;
+      }
+
+      .hint-modal-body {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 20px;
+        flex: 1;
+        min-height: 0;
+        gap: 20px;
+      }
+
+      .hint-modal-content {
+        flex-shrink: 0;
+        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .hint-main-view[hidden],
+      .hint-detail-view[hidden],
+      .hint-back[hidden] {
+        display: none;
+      }
+
+      .hint-back {
+        font-size: 32px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #111;
+        padding: 0;
+        margin-right: 8px;
+        line-height: 1;
+      }
+
+      .hint-detail-view {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 20px;
+        flex: 1;
+        min-height: 0;
+        gap: 20px;
+      }
+
+      .hint-detail-scroll {
+        overflow-y: auto;
+        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-height: 0;
+        flex: 1;
+      }
+
+      .hint-detail-text-wrap {
+        flex: 1;
+        min-height: 0;
+      }
+
+      .hint-detail-text-shell {
+        color: #000;
+        font-size: 32px;
+        height: 100%;
+      }
+
+      .hint-detail-text {
+        color: #000;
+        font-size: 18px;
+        margin: 0;
+      }
+
+      .hint-list {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hint-option {
+        font-weight: 800;
+        font-family: Georgia, serif;
+        transition: opacity 0.15s ease-in-out;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        padding: 16px 0;
+      }
+
+      .hint-option-label {
+        position: relative;
+        display: inline-block;
+      }
+
+      .hint-option-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 8px;
+        bottom: 1px;
+        z-index: 0;
+        border-radius: 4px;
+      }
+
+      .hint-option-text {
+        position: relative;
+        padding: 0 4px;
+        margin: 0;
+        text-align: center;
+        z-index: 1;
+        font-size: 24px;
+      }
+
+      .hint-divider {
+        padding-top: 4px;
+        border-top: 2px solid #eef5ff;
+      }
+
+      .hint-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        font-size: 32px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #111;
+      }
+
+      .hint-modal-layer.is-open {
+        pointer-events: auto;
+      }
+
+      .hint-modal-layer.is-open .hint-modal-backdrop {
+        opacity: 1;
+      }
+
+      .hint-modal-layer.is-open .hint-modal-panel {
+        transform: translateY(0);
+      }
+
+      .solution.is-shaking .box {
+        animation: shake-box 0.35s ease-in-out;
+      }
+
+      @keyframes shake-box {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+
+        20% {
+          transform: translateX(-5px);
+        }
+
+        40% {
+          transform: translateX(5px);
+        }
+
+        60% {
+          transform: translateX(-4px);
+        }
+
+        80% {
+          transform: translateX(4px);
+        }
+      }
+
+      .result-card-host {
+        width: 100%;
+      }
+
+      .result-card-shell {
+        background: #fff;
+        border: 4px solid var(--black);
+        border-radius: 12px;
+        padding: 20px 16px;
+        box-shadow: 4px 4px 0 0 var(--black);
+      }
+
+      .result-card-dots {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .result-card-dot {
+        border: 2px solid var(--black);
+        width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        background: var(--mc-pink);
+      }
+
+      .result-card-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 10px 0 4px;
+      }
+
+      .result-card-subtitle {
+        text-align: center;
+        margin: 0;
+      }
+
+      .result-card-share {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+      }
+
+      @media (max-width: 900px) {
+        .page {
+          max-width: 100%;
+          padding-bottom: 16px;
+        }
+
+        .section {
+          padding: 12px;
+        }
+
+        .card {
+          padding: 14px;
+          border-radius: 14px;
+        }
+
+        .title {
+          font-size: 22px;
+        }
+
+        .subtitle {
+          font-size: 17px;
+        }
+
+        .clue {
+          font-size: 16px;
+          line-height: 1.35;
+        }
+
+        .solution-actions {
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .hint-modal-wrap {
+          bottom: 8px;
+          padding: 0 10px;
+        }
+
+        .hint-modal-panel {
+          max-height: calc(100vh - 1rem);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .top {
+          padding: 10px 12px;
+        }
+
+        .section {
+          padding: 10px;
+        }
+
+        .card {
+          padding: 12px;
+          box-shadow: 3px 3px 0 0 var(--black);
+        }
+
+        .title {
+          font-size: 20px;
+          margin-bottom: 10px;
+        }
+
+        .clue {
+          font-size: 15px;
+          margin-bottom: 12px;
+        }
+
+        .solution {
+          gap: 8px;
+          overflow-x: hidden;
+          padding-bottom: 0;
+        }
+
+        .word {
+          gap: 4px;
+          width: 100%;
+          margin: 0;
+          justify-content: center;
+        }
+
+        .word[aria-label='congratulations'] {
+          gap: 2px;
+        }
+
+        .word[aria-label='congratulations'] .box {
+          width: calc((100% - 28px) / 15);
+          min-width: 14px;
+          max-width: 22px;
+          height: 28px;
+          font-size: 14px;
+        }
+
+        .box {
+          width: 22px;
+          height: 30px;
+          font-size: 15px;
+          border-radius: 5px;
+        }
+
+        .shadow-btn {
+          min-height: 46px;
+          height: 46px;
+          font-size: 18px;
+          padding: 0 16px;
+        }
+
+        .shadow-icon-btn {
+          width: 46px;
+          height: 46px;
+        }
+
+        .scribble-space-shell {
+          padding: 8px;
+        }
+
+        [data-scribble-container='true'] {
+          min-height: 260px;
+        }
+
+        .hint-modal-header {
+          padding: 12px;
+          padding-right: 48px;
+        }
+
+        .hint-modal-content,
+        .hint-detail-scroll {
+          padding: 0 12px;
+        }
+
+        .hint-option {
+          padding: 12px 0;
+        }
+
+        .hint-option-text {
+          font-size: 21px;
+        }
+
+        .hint-detail-text {
+          font-size: 16px;
+          line-height: 1.4;
+        }
+
+        .hint-close,
+        .hint-back {
+          font-size: 28px;
+        }
+
+        .result-card-shell {
+          padding: 16px 12px;
+        }
+
+        .result-card-title {
+          font-size: 28px;
+        }
+      }
+
+      @media (max-width: 390px) {
+        .box {
+          width: 20px;
+          height: 28px;
+          font-size: 14px;
+        }
+
+        .word {
+          gap: 3px;
+        }
+
+        .solution-actions {
+          gap: 8px;
+        }
+
+        .shadow-btn {
+          font-size: 17px;
+          padding: 0 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <div class="top-row">
+          <strong>Minute Cryptic</strong>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="card">
+          <h1 class="title">Today's clue</h1>
+          <p class="clue">
+            "<span class="clue-part" id="clue-definition">Kudos, physician!</span>
+            <span class="clue-part" id="clue-fodder">Ila, doctor on stunt cargo</span>
+            <span class="clue-part" id="clue-indicator">mixed up</span>" (15 - 6)
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2 class="subtitle">Soluzione</h2>
+          <div class="solution" id="solution-grid" aria-label="Caselle soluzione">
+            <div class="word" aria-label="congratulations">
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+            </div>
+            <div class="word" aria-label="doctor">
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+              <input class="box" maxlength="1" />
+            </div>
+          </div>
+          <div class="solution-actions" id="solution-actions" aria-label="Azioni soluzione">
+            <button
+              aria-label="Toggle scribble space"
+              id="scribble-btn"
+              class="size-12 font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black flex items-center justify-center font-serif border-[3px] border-black rounded-full transition-all duration-300 active:opacity-50 enabled:hover:scale-[105%] shadow-[3px_3px_0px_0px_black] disabled:opacity-50 disabled:shadow-[3px_3px_0px_0px_rgba(0,0,0,0)] max-w-full bg-mc-blue p-0 shadow-icon-btn"
+              data-sentry-component="ShadowIconButton"
+              data-sentry-source-file="ShadowIconButton.tsx"
+              type="button"
+            >
+              <div class="relative min-w-0 flex">
+                <span class="text-black text-center p-0" style="font-size: 20px"
+                  ><svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 40 40"
+                    fill="none"
+                    data-sentry-element="svg"
+                    data-sentry-component="ScribbleIcon"
+                    data-sentry-source-file="ScribbleIcon.tsx"
+                  >
+                    <path
+                      d="M11 18.5879C14.1979 17.7315 21.2911 8.41827 24.819 11.6967C26.6179 13.3683 15.4341 21.0046 15.4182 24.3633C15.4085 26.4214 27.3456 17.0731 28.4865 18.236C31.0441 20.8429 23.2043 24.7621 23.418 28.2673C23.5524 30.4719 27.1602 27.0614 28.1183 26.4005"
+                      stroke="black"
+                      stroke-width="2.7"
+                      stroke-linecap="round"
+                      data-sentry-element="path"
+                      data-sentry-source-file="ScribbleIcon.tsx"
+                    ></path></svg
+                ></span>
+              </div>
+            </button>
+
+            <button
+              data-sentry-element="ShadowButton"
+              data-sentry-source-file="ShadowButton.tsx"
+              aria-label="hints"
+              id="hints-btn"
+              class="min-h-[48px] max-h-[96px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black flex items-center justify-center px-[32px] font-serif border-[3px] border-black rounded-full transition-all duration-300 active:opacity-50 enabled:hover:scale-[105%] shadow-[3px_3px_0px_0px_black] disabled:opacity-50 disabled:shadow-[3px_3px_0px_0px_rgba(0,0,0,0)] max-w-full bg-mc-yellow shadow-btn shadow-btn-yellow"
+              type="button"
+            >
+              <div class="relative min-w-0 flex">
+                <p class="text-black text-center -translate-y-[2px] line-clamp-3 p-[0.14em]" style="font-size: 20px">hints</p>
+              </div>
+            </button>
+            <button
+              data-sentry-element="ShadowButton"
+              data-sentry-source-file="ShadowButton.tsx"
+              aria-label="check"
+              id="check-btn"
+              class="min-h-[48px] max-h-[96px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black flex items-center justify-center px-[32px] font-serif border-[3px] border-black rounded-full transition-all duration-300 active:opacity-50 enabled:hover:scale-[105%] shadow-[3px_3px_0px_0px_black] disabled:opacity-50 disabled:shadow-[3px_3px_0px_0px_rgba(0,0,0,0)] max-w-full bg-mc-pink shadow-btn shadow-btn-pink"
+              type="button"
+            >
+              <div class="relative min-w-0 flex">
+                <p class="text-black text-center -translate-y-[2px] line-clamp-3 p-[0.14em]" style="font-size: 20px">check</p>
+              </div>
+            </button>
+          </div>
+
+          <div class="scribble-space-view" id="scribble-space-view" hidden>
+            <div class="scribble-space-shell">
+              <div
+                data-scribble-container="true"
+                id="scribble-container"
+                class="flex-1 flex flex-col relative overflow-hidden touch-none select-none"
+                data-sentry-component="ScribbleSpace"
+                data-sentry-source-file="ScribbleSpace.tsx"
+              >
+                <div
+                  class="absolute left-0 right-0 bottom-0 pointer-events-none"
+                  data-sentry-component="ScribbleSpaceClearOverlay"
+                  data-sentry-source-file="ScribbleSpaceClearOverlay.tsx"
+                  style="
+                    top: 58px;
+                    background-color: rgba(220, 38, 38, 0.35);
+                    z-index: 0;
+                    clip-path: ellipse(35% 36px at 50% 100%);
+                    opacity: 0;
+                  "
+                ></div>
+                <div
+                  class="absolute bottom-0 left-1/2 pointer-events-none"
+                  style="
+                    width: 70%;
+                    height: 72px;
+                    border-radius: 50%;
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(100%);
+                    transition:
+                      opacity 200ms,
+                      transform 200ms,
+                      background-color 150ms,
+                      width 200ms,
+                      height 200ms;
+                    background-color: rgba(120, 120, 120, 0.18);
+                  "
+                ></div>
+                <div
+                  class="absolute bottom-0 left-1/2 pointer-events-none flex items-start justify-center"
+                  style="
+                    width: 70%;
+                    height: 72px;
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(100%);
+                    transition:
+                      opacity 200ms,
+                      transform 200ms;
+                  "
+                >
+                  <svg
+                    stroke="currentColor"
+                    fill="currentColor"
+                    stroke-width="0"
+                    viewBox="0 0 448 512"
+                    class="text-white"
+                    data-sentry-element="FaRegTrashAlt"
+                    data-sentry-source-file="ScribbleSpaceTrash.tsx"
+                    height="1em"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style="margin-top: 6px; font-size: 21.6px"
+                  >
+                    <path
+                      d="M268 416h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12zM432 80h-82.41l-34-56.7A48 48 0 0 0 274.41 0H173.59a48 48 0 0 0-41.16 23.3L98.41 80H16A16 16 0 0 0 0 96v16a16 16 0 0 0 16 16h16v336a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128h16a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM171.84 50.91A6 6 0 0 1 177 48h94a6 6 0 0 1 5.15 2.91L293.61 80H154.39zM368 464H80V128h288zm-212-48h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="hint-modal-layer" id="hint-modal" aria-hidden="true">
+      <div class="hint-modal-backdrop" id="hint-modal-backdrop"></div>
+      <div class="hint-modal-wrap">
+        <div
+          class="hint-modal-panel relative w-full sm:w-[400px] max-h-[calc(100vh-2rem)] border-[3px] shadow-[3px_3px_0px_0px_black] border-black rounded-[16px] bg-white mx-auto my-auto flex flex-col"
+        >
+          <div class="hint-modal-header flex items-center p-4 pr-14 flex-shrink-0">
+            <div class="flex-1 flex gap-2 items-center">
+              <button
+                class="hint-back text-[32px] cursor-pointer active:opacity-60 transition-opacity duration-200"
+                aria-label="Back"
+                id="hint-back-btn"
+                type="button"
+                hidden
+              >
+                <svg
+                  width="27"
+                  height="27"
+                  viewBox="0 0 27 27"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data-sentry-element="svg"
+                  data-sentry-component="BackIcon"
+                  data-sentry-source-file="BackIcon.tsx"
+                >
+                  <path
+                    d="M24.2904 13.5026H2.70703M2.70703 13.5026L13.4987 24.2943M2.70703 13.5026L13.4987 2.71094"
+                    stroke="#1E1E1E"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    data-sentry-element="path"
+                    data-sentry-source-file="BackIcon.tsx"
+                  ></path>
+                </svg>
+              </button>
+              <div><p id="modal-title" class="hint-modal-title text-black text-base">Select a hint</p></div>
+            </div>
+          </div>
+          <div class="hint-modal-body flex flex-col pb-5 flex-1 min-h-0 gap-5" id="hint-main-view">
+            <div class="hint-modal-content flex-shrink-0 px-4 flex flex-col gap-5">
+              <div class="hint-list flex flex-col items-start">
+                <button
+                  class="hint-option font-extrabold font-serif transition active:opacity-60 duration-150 ease-in-out disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black py-4"
+                  id="hint-show-indicators"
+                  type="button"
+                >
+                  <span class="hint-option-label relative inline-block group">
+                    <span
+                      class="hint-option-line absolute left-0 right-0 h-2 bottom-[1px] z-0 rounded-sm transition-transform duration-300 group-hover:scale-105 bg-mc-pink"
+                      style="background: var(--mc-pink)"
+                    ></span>
+                    <p class="hint-option-text px-1 transition-transform duration-300 text-center scale-100 z-10 text-xl">
+                      show indicators
+                    </p>
+                  </span>
+                </button>
+                <button
+                  class="hint-option font-extrabold font-serif transition active:opacity-60 duration-150 ease-in-out disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black py-4"
+                  id="hint-show-fodder"
+                  type="button"
+                >
+                  <span class="hint-option-label relative inline-block group">
+                    <span
+                      class="hint-option-line absolute left-0 right-0 h-2 bottom-[1px] z-0 rounded-sm transition-transform duration-300 group-hover:scale-105 bg-mc-yellow"
+                      style="background: var(--mc-yellow)"
+                    ></span>
+                    <p class="hint-option-text px-1 transition-transform duration-300 text-center scale-100 z-10 text-xl">show fodder</p>
+                  </span>
+                </button>
+                <button
+                  class="hint-option font-extrabold font-serif transition active:opacity-60 duration-150 ease-in-out disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black py-4"
+                  id="hint-show-definition"
+                  type="button"
+                >
+                  <span class="hint-option-label relative inline-block group">
+                    <span
+                      class="hint-option-line absolute left-0 right-0 h-2 bottom-[1px] z-0 rounded-sm transition-transform duration-300 group-hover:scale-105 bg-mc-blue"
+                      style="background: var(--mc-blue)"
+                    ></span>
+                    <p class="hint-option-text px-1 transition-transform duration-300 text-center scale-100 z-10 text-xl">
+                      show definition
+                    </p>
+                  </span>
+                </button>
+              </div>
+              <div class="hint-divider pt-1 border-t-2 border-card">
+                <button
+                  class="hint-option font-extrabold font-serif transition active:opacity-60 duration-150 ease-in-out disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black py-4"
+                  id="hint-show-letter"
+                  type="button"
+                >
+                  <span class="hint-option-label relative inline-block group">
+                    <span
+                      class="hint-option-line absolute left-0 right-0 h-2 bottom-[1px] z-0 rounded-sm transition-transform duration-300 group-hover:scale-105 bg-mc-yellow"
+                      style="background: var(--mc-yellow)"
+                    ></span>
+                    <p class="hint-option-text px-1 transition-transform duration-300 text-center scale-100 z-10 text-xl">show letter</p>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="hint-detail-view" id="hint-detail-view" hidden>
+            <div class="hint-detail-scroll overflow-y-auto px-4 flex flex-col gap-5 min-h-0 flex-1">
+              <div class="hint-detail-text-wrap flex-1 min-h-0">
+                <div class="hint-detail-text-shell text-black text-2xl h-full">
+                  <p
+                    role="status"
+                    class="hint-detail-text text-black text-[18px]"
+                    id="hint-detail-text"
+                    data-sentry-component="PuzzleHintContent"
+                    data-sentry-source-file="PuzzleHintContent.tsx"
+                  ></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="hint-close absolute top-4 right-4 text-[32px] cursor-pointer active:opacity-60 transition-opacity duration-200"
+            aria-label="Close"
+            id="hint-modal-close"
+            type="button"
+          >
+            <svg
+              stroke="currentColor"
+              fill="none"
+              stroke-width="0"
+              viewBox="0 0 24 24"
+              data-sentry-element="CgClose"
+              data-sentry-source-file="ModalContentRenderer.tsx"
+              height="1em"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6.2253 4.81108C5.83477 4.42056 5.20161 4.42056 4.81108 4.81108C4.42056 5.20161 4.42056 5.83477 4.81108 6.2253L10.5858 12L4.81114 17.7747C4.42062 18.1652 4.42062 18.7984 4.81114 19.1889C5.20167 19.5794 5.83483 19.5794 6.22535 19.1889L12 13.4142L17.7747 19.1889C18.1652 19.5794 18.7984 19.5794 19.1889 19.1889C19.5794 18.7984 19.5794 18.1652 19.1889 17.7747L13.4142 12L19.189 6.2253C19.5795 5.83477 19.5795 5.20161 19.189 4.81108C18.7985 4.42056 18.1653 4.42056 17.7748 4.81108L12 10.5858L6.2253 4.81108Z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const hintsBtn = document.getElementById('hints-btn') || document.querySelector('[aria-label="hints"]');
+        const hintModal = document.getElementById('hint-modal');
+        const hintModalClose = document.getElementById('hint-modal-close');
+        const hintModalBackdrop = document.getElementById('hint-modal-backdrop');
+        const hintMainView = document.getElementById('hint-main-view');
+        const hintDetailView = document.getElementById('hint-detail-view');
+        const hintBackBtn = document.getElementById('hint-back-btn');
+        const hintDetailText = document.getElementById('hint-detail-text');
+        const modalTitle = document.getElementById('modal-title');
+        const showIndicatorsBtn = document.getElementById('hint-show-indicators');
+        const showFodderBtn = document.getElementById('hint-show-fodder');
+        const showDefinitionBtn = document.getElementById('hint-show-definition');
+        const showLetterBtn = document.getElementById('hint-show-letter');
+
+        const clueDefinition = document.getElementById('clue-definition');
+        const clueFodder = document.getElementById('clue-fodder');
+        const clueIndicator = document.getElementById('clue-indicator');
+        const checkBtn = document.getElementById('check-btn');
+        const solutionGrid = document.getElementById('solution-grid');
+        const solutionActions = document.getElementById('solution-actions');
+        const boxes = Array.from(document.querySelectorAll('.box'));
+        const scribbleBtn = document.getElementById('scribble-btn');
+        const scribbleSpaceView = document.getElementById('scribble-space-view');
+        const scribbleContainer = document.getElementById('scribble-container');
+
+        const clueParts = [clueDefinition, clueFodder, clueIndicator].filter(Boolean);
+
+        if (!hintsBtn || !hintModal || !hintModalClose || !hintModalBackdrop) {
+          return;
+        }
+
+        const hintDetailMessages = {
+          definition:
+            "Our definition here is 'Kudos, physician!', and (with a little stretch from our escalmation mark) our answer will be another word for that.",
+          fodder:
+            "This clue's fodder is 'Ila, doctor on stunt cargo'. We'll need to find out how to use it with the clue'indicator(s) to construct our answer",
+          indicators: `This clue's indicators is "mixed up" that is an anagram indicator, so you have to anagram the fodders.`
+        };
+
+        const showHintsMenuView = () => {
+          if (hintMainView) {
+            hintMainView.hidden = false;
+          }
+
+          if (hintDetailView) {
+            hintDetailView.hidden = true;
+          }
+
+          if (hintBackBtn) {
+            hintBackBtn.hidden = true;
+          }
+
+          if (modalTitle) {
+            modalTitle.textContent = 'Select a hint';
+          }
+        };
+
+        const showHintDetailView = type => {
+          if (hintMainView) {
+            hintMainView.hidden = true;
+          }
+
+          if (hintDetailView) {
+            hintDetailView.hidden = false;
+          }
+
+          if (hintBackBtn) {
+            hintBackBtn.hidden = false;
+          }
+
+          if (modalTitle) {
+            modalTitle.textContent = '';
+          }
+
+          if (hintDetailText) {
+            hintDetailText.textContent = hintDetailMessages[type] || '';
+          }
+        };
+
+        const openHintModal = () => {
+          showHintsMenuView();
+          hintModal.classList.add('is-open');
+          hintModal.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeHintModal = () => {
+          showHintsMenuView();
+          hintModal.classList.remove('is-open');
+          hintModal.setAttribute('aria-hidden', 'true');
+        };
+
+        const highlightCluePart = (targetPart, highlightClass) => {
+          if (!targetPart) {
+            return;
+          }
+
+          targetPart.classList.add(highlightClass);
+        };
+
+        const shakeSolution = () => {
+          if (!solutionGrid) {
+            return;
+          }
+
+          solutionGrid.classList.remove('is-shaking');
+          void solutionGrid.offsetWidth;
+          solutionGrid.classList.add('is-shaking');
+
+          window.setTimeout(() => {
+            solutionGrid.classList.remove('is-shaking');
+          }, 400);
+        };
+
+        const solutionLetters = 'congratulationsdoctor';
+        let nextLetterIndex = 0;
+        let nextTileId = 1;
+        const maxScribbleTiles = 21;
+        const revealNextLetter = () => {
+          if (!boxes.length || nextLetterIndex >= solutionLetters.length) {
+            return;
+          }
+
+          while (nextLetterIndex < solutionLetters.length) {
+            const targetBox = boxes[nextLetterIndex];
+            const targetLetter = solutionLetters[nextLetterIndex];
+
+            targetBox.value = targetLetter;
+            targetBox.classList.add('hint-letter');
+
+            nextLetterIndex += 1;
+            break;
+          }
+        };
+
+        boxes.forEach((box, index) => {
+          box.addEventListener('input', () => {
+            box.value = box.value.slice(0, 1);
+
+            if (box.value && index < boxes.length - 1) {
+              boxes[index + 1].focus();
+            }
+          });
+
+          box.addEventListener('keydown', event => {
+            if (event.key === 'Backspace' && !box.value && index > 0) {
+              boxes[index - 1].focus();
+            }
+          });
+        });
+
+        const dragState = {
+          tile: null,
+          pointerId: null,
+          offsetX: 0,
+          offsetY: 0,
+          containerRect: null,
+          touchId: null
+        };
+
+        const startDraggedTile = (tile, clientX, clientY, touchId = null, pointerId = null) => {
+          if (!scribbleContainer) {
+            return;
+          }
+
+          const tileRect = tile.getBoundingClientRect();
+          dragState.tile = tile;
+          dragState.offsetX = clientX - tileRect.left;
+          dragState.offsetY = clientY - tileRect.top;
+          dragState.containerRect = scribbleContainer.getBoundingClientRect();
+          dragState.touchId = touchId;
+          dragState.pointerId = pointerId;
+
+          tile.classList.add('is-dragging');
+          tile.style.transition = 'none';
+        };
+
+        const moveDraggedTile = (clientX, clientY) => {
+          if (!dragState.tile || !dragState.containerRect) {
+            return;
+          }
+
+          const tileSize = dragState.tile.getBoundingClientRect().width;
+          const maxLeft = dragState.containerRect.width - tileSize;
+          const maxTop = dragState.containerRect.height - tileSize;
+          const nextLeft = Math.min(Math.max(0, clientX - dragState.containerRect.left - dragState.offsetX), maxLeft);
+          const nextTop = Math.min(Math.max(0, clientY - dragState.containerRect.top - dragState.offsetY), maxTop);
+
+          dragState.tile.style.left = `${nextLeft}px`;
+          dragState.tile.style.top = `${nextTop}px`;
+        };
+
+        const stopDraggedTile = () => {
+          if (!dragState.tile) {
+            return;
+          }
+
+          dragState.tile.classList.remove('is-dragging');
+          dragState.tile.style.transition = 'left 0.2s, top 0.2s, opacity 0.2s';
+
+          dragState.tile = null;
+          dragState.containerRect = null;
+          dragState.touchId = null;
+          dragState.pointerId = null;
+        };
+
+        const createScribbleTile = letter => {
+          if (!scribbleContainer) {
+            return;
+          }
+
+          const existingTiles = scribbleContainer.querySelectorAll('.scribble-tile').length;
+
+          if (existingTiles >= maxScribbleTiles) {
+            return;
+          }
+
+          const containerRect = scribbleContainer.getBoundingClientRect();
+          const tileSize = 46;
+          const tileGap = 8;
+          const step = tileSize + tileGap;
+          const startX = 12;
+          const startY = 12;
+          const availableWidth = Math.max(tileSize, containerRect.width - startX * 2);
+          const columns = Math.max(1, Math.floor((availableWidth - tileSize) / step) + 1);
+          const row = Math.floor(existingTiles / columns);
+          const col = existingTiles % columns;
+          const xPosition = Math.min(startX + col * step, Math.max(0, containerRect.width - tileSize));
+          const yPosition = Math.min(startY + row * step, Math.max(0, containerRect.height - tileSize));
+
+          const tile = document.createElement('div');
+          const tileId = String(nextTileId++);
+          const normalizedLetter = letter.toUpperCase();
+          const visibleLetter = letter.toLowerCase();
+
+          tile.setAttribute('data-tile-id', tileId);
+          tile.setAttribute('data-tile-letter', normalizedLetter);
+          tile.setAttribute('data-sentry-component', 'ScribbleSpaceTileInner');
+          tile.setAttribute('data-sentry-source-file', 'ScribbleSpaceTile.tsx');
+          tile.className =
+            'scribble-tile absolute outline-black aspect-square -outline-offset-2 outline-4 outline-none flex items-center justify-center font-serif overflow-visible rounded-lg select-none bg-white cursor-grab';
+          tile.style.cssText = `width: 46px; height: 46px; left: ${xPosition}px; top: ${yPosition}px; touch-action: none; transition: left 0.2s, top 0.2s, opacity 0.2s`;
+          tile.innerHTML = `<span class="scribble-tile-letter -translate-y-0.5 text-4xl select-none pointer-events-none">${visibleLetter}</span>`;
+
+          scribbleContainer.appendChild(tile);
+        };
+
+        const openScribbleSpace = () => {
+          if (!solutionActions || !scribbleSpaceView) {
+            return;
+          }
+
+          solutionActions.hidden = true;
+          scribbleSpaceView.hidden = false;
+        };
+
+        if (scribbleContainer) {
+          const getTileFromTarget = target => {
+            if (target instanceof Element) {
+              return target.closest('.scribble-tile');
+            }
+
+            if (target && target.parentElement) {
+              return target.parentElement.closest('.scribble-tile');
+            }
+
+            return null;
+          };
+
+          if (typeof window.PointerEvent === 'function') {
+            scribbleContainer.addEventListener('pointerdown', event => {
+              const tile = getTileFromTarget(event.target);
+
+              if (!tile || !scribbleContainer.contains(tile)) {
+                return;
+              }
+
+              if (event.pointerType !== 'touch' && event.button !== 0) {
+                return;
+              }
+
+              event.preventDefault();
+              startDraggedTile(tile, event.clientX, event.clientY, null, event.pointerId);
+
+              if (tile.setPointerCapture) {
+                tile.setPointerCapture(event.pointerId);
+              }
+            });
+
+            scribbleContainer.addEventListener('pointermove', event => {
+              if (dragState.pointerId !== null && event.pointerId !== dragState.pointerId) {
+                return;
+              }
+
+              if (dragState.tile) {
+                event.preventDefault();
+              }
+
+              moveDraggedTile(event.clientX, event.clientY);
+            });
+
+            const endPointerDrag = event => {
+              if (dragState.pointerId !== null && event.pointerId !== dragState.pointerId) {
+                return;
+              }
+
+              if (dragState.tile && dragState.tile.releasePointerCapture && event.pointerId !== undefined) {
+                try {
+                  if (dragState.tile.hasPointerCapture(event.pointerId)) {
+                    dragState.tile.releasePointerCapture(event.pointerId);
+                  }
+                } catch (_error) {}
+              }
+
+              stopDraggedTile();
+            };
+
+            scribbleContainer.addEventListener('pointerup', endPointerDrag);
+            scribbleContainer.addEventListener('pointercancel', endPointerDrag);
+          } else {
+            scribbleContainer.addEventListener('mousedown', event => {
+              const tile = getTileFromTarget(event.target);
+
+              if (!tile || !scribbleContainer.contains(tile) || event.button !== 0) {
+                return;
+              }
+
+              event.preventDefault();
+              startDraggedTile(tile, event.clientX, event.clientY);
+            });
+
+            window.addEventListener('mousemove', event => {
+              moveDraggedTile(event.clientX, event.clientY);
+            });
+            window.addEventListener('mouseup', stopDraggedTile);
+
+            scribbleContainer.addEventListener(
+              'touchstart',
+              event => {
+                const tile = getTileFromTarget(event.target);
+
+                if (!tile || !scribbleContainer.contains(tile) || !event.changedTouches.length) {
+                  return;
+                }
+
+                const touch = event.changedTouches[0];
+                event.preventDefault();
+                startDraggedTile(tile, touch.clientX, touch.clientY, touch.identifier);
+              },
+              { passive: false }
+            );
+
+            window.addEventListener(
+              'touchmove',
+              event => {
+                if (dragState.touchId === null) {
+                  return;
+                }
+
+                const touch = Array.from(event.changedTouches).find(item => item.identifier === dragState.touchId);
+
+                if (!touch) {
+                  return;
+                }
+
+                event.preventDefault();
+                moveDraggedTile(touch.clientX, touch.clientY);
+              },
+              { passive: false }
+            );
+
+            window.addEventListener('touchend', event => {
+              if (dragState.touchId === null) {
+                return;
+              }
+
+              const endedTouch = Array.from(event.changedTouches).find(item => item.identifier === dragState.touchId);
+
+              if (endedTouch) {
+                stopDraggedTile();
+              }
+            });
+
+            window.addEventListener('touchcancel', stopDraggedTile);
+          }
+        }
+
+        if (checkBtn && solutionActions && boxes.length >= 21) {
+          checkBtn.addEventListener('click', () => {
+            const firstWord = boxes
+              .slice(0, 15)
+              .map(box => box.value)
+              .join('');
+            const secondWord = boxes
+              .slice(15, 21)
+              .map(box => box.value)
+              .join('');
+            const attempt = `${firstWord} ${secondWord}`.trim().toLowerCase();
+
+            if (attempt === 'congratulations doctor') {
+              solutionActions.innerHTML = `
+<div class="flex-[0_0_100%] snap-start snap-always px-2 result-card-host"><div class="pb-[6px] pr-[6px]"><div class="w-full bg-white rounded-xl border-4 border-black px-4 py-5 shadow-[4px_4px_0px_0px_theme(colors.black)] flex flex-col gap-6 items-center animate-slideUp result-card-shell" data-sentry-component="ResultsCard" data-sentry-source-file="ResultsCard.tsx"><div class="flex justify-center flex-wrap gap-2 mt-2 result-card-dots" data-sentry-component="SolveStoryVisual" data-sentry-source-file="SolveStoryVisual.tsx"><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              bg-mc-yellow
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              bg-mc-yellow
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              bg-white result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              bg-white result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              bg-white result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div><div class="flex flex-col items-center"><div class="border-2 border-black size-[20px] rounded-xl bg-mc-pink
+              false
+              false result-card-dot"></div></div></div><div class="flex flex-col gap-2 items-center"><h2 class="font-sans font-extrabold text-2xl result-card-title">You got it!</h2><div class="font-sans text-base result-card-subtitle" style="animation: auto ease 0s 1 normal none running none;"></div></div><div class="flex flex-col gap-4 pt-2 items-center result-card-share"><button data-sentry-element="ShadowButton" data-sentry-source-file="ShadowButton.tsx" aria-label="share" class="min-h-[48px] max-h-[96px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black flex items-center justify-center px-[32px] font-serif border-[3px] border-black rounded-full transition-all duration-300 active:opacity-50 enabled:hover:scale-[105%] shadow-[3px_3px_0px_0px_black] disabled:opacity-50 disabled:shadow-[3px_3px_0px_0px_rgba(0,0,0,0)] max-w-full bg-mc-pink w-fit shadow-btn shadow-btn-pink" data-sentry-component="ShadowButton"><div class="relative min-w-0 flex"><p class="text-black text-center -translate-y-[2px] line-clamp-3 p-[0.14em]" style="font-size: 20px;">share</p></div></button></div></div></div></div>
+              `;
+
+              return;
+            }
+
+            shakeSolution();
+          });
+        }
+
+        hintsBtn.addEventListener('click', openHintModal);
+        hintModalClose.addEventListener('click', closeHintModal);
+        hintModalBackdrop.addEventListener('click', closeHintModal);
+
+        if (showIndicatorsBtn) {
+          showIndicatorsBtn.addEventListener('click', () => {
+            highlightCluePart(clueIndicator, 'clue-highlight-indicator');
+            showHintDetailView('indicators');
+          });
+        }
+
+        if (showFodderBtn) {
+          showFodderBtn.addEventListener('click', () => {
+            highlightCluePart(clueFodder, 'clue-highlight-fodder');
+            showHintDetailView('fodder');
+          });
+        }
+
+        if (showDefinitionBtn) {
+          showDefinitionBtn.addEventListener('click', () => {
+            highlightCluePart(clueDefinition, 'clue-highlight-definition');
+            showHintDetailView('definition');
+          });
+        }
+
+        if (hintBackBtn) {
+          hintBackBtn.addEventListener('click', showHintsMenuView);
+        }
+
+        if (showLetterBtn) {
+          showLetterBtn.addEventListener('click', revealNextLetter);
+        }
+
+        if (scribbleBtn) {
+          scribbleBtn.addEventListener('click', openScribbleSpace);
+        }
+
+        document.addEventListener('keydown', event => {
+          if (!scribbleSpaceView || scribbleSpaceView.hidden) {
+            return;
+          }
+
+          if (event.ctrlKey || event.metaKey || event.altKey) {
+            return;
+          }
+
+          if (/^[a-zA-Z]$/.test(event.key)) {
+            createScribbleTile(event.key);
+            event.preventDefault();
+          }
+        });
+
+        document.addEventListener('keydown', event => {
+          if (event.key === 'Escape') {
+            closeHintModal();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
